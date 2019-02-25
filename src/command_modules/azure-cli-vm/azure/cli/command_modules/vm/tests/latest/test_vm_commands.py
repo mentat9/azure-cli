@@ -357,6 +357,50 @@ class VMCustomImageTest(ScenarioTest):
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_conflict')
+    def test_vm_custom_image_name_conflict(self, resource_group):
+        self.kwargs.update({
+            'vm': 'test-vm',
+            'image1': 'img-from-vm',
+            'image2': 'img-from-vm-id',
+            'image3': 'img-from-disk-id',
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password')
+        vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.cmd('vm stop -g {rg} -n {vm}')
+
+        # set variables up to test against name conflict between disk and vm.
+        self.kwargs.update({
+            'os_disk_vhd_uri': vm1_info['storageProfile']['osDisk']['vhd']['uri'],
+            'vm_id': vm1_info['id'],
+            'os_disk': vm1_info['name']
+        })
+
+        # create disk with same name as vm
+        disk_info = self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux').get_output_in_json()
+        self.kwargs.update({'os_disk_id': disk_info['id']})
+
+        # Deallocate and generalize vm. Do not need to deprovision vm as this test will not recreate a vm from the image.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        # Create image from vm
+        self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from vm id
+        self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from disk id
+        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux', checks=[
+            self.check("sourceVirtualMachine", None),
+            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
+        ])
+
 
 class VMImageWithPlanTest(ScenarioTest):
 
@@ -418,8 +462,8 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
             'vm': 'vm2',
             'os_disk': 'os1'
         })
-        self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri}',
-                 checks=self.check('name', '{os_disk}'))
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux',
+                 checks=[self.check('name', '{os_disk}'), self.check('osType', 'Linux')])
         # create a vm by attaching to it
         self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {os_disk} --os-type linux',
                  checks=self.check('powerState', 'VM running'))
@@ -651,7 +695,7 @@ class VMWriteAcceleratorScenarioTest(ScenarioTest):
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', True),
             self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
         ])
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk d1 --enable-write-accelerator --new --size-gb 1')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name d1 --enable-write-accelerator --new --size-gb 1')
         self.cmd('vm update -g {rg} -n {vm} --write-accelerator 1=false os=false')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', False),
@@ -817,7 +861,7 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
-            'availset': 'availset-test'
+            'availset': 'availset-test-conv'
         })
 
         self.cmd('vm availability-set create -g {rg} -n {availset} --unmanaged --platform-fault-domain-count 3 -l westus2', checks=[
@@ -1152,22 +1196,47 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'pub': 'Microsoft.Azure.NetworkWatcher',
-            'ext': 'NetworkWatcherAgentLinux',
+            'net-pub': 'Microsoft.Azure.NetworkWatcher', 'script-pub': 'Microsoft.Azure.Extensions', 'access-pub': 'Microsoft.OSTCExtensions',
+            'net-ext': 'NetworkWatcherAgentLinux', 'script-ext': 'customScript', 'access-ext': 'VMAccessForLinux',
             'username': username,
             'config_file': config_file
         })
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
-        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
+        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
-            self.check('name', '{ext}'),
-            self.check('publisher', '{pub}'),
+            self.check('name', '{net-ext}'),
+            self.check('publisher', '{net-pub}'),
+            self.check('provisionAfterExtensions', None)
         ]).get_output_in_json()
-        uuid.UUID(result['forceUpdateTag'])
-        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext}')
+
+        uuid.UUID(result['forceUpdateTag'])  # verify that command does generate a valid guid to trigger force update.
+
+        # set the customscript extension that depends on the network watcher extension
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {script-ext} --publisher {script-pub} --version 2.0 '
+                 '--provision-after-extensions {net-ext} --settings "{{\\"commandToExecute\\": \\"echo testing\\"}}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {script-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 1),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+        ])
+
+        # set the VMAccess extension that depends on both the network watcher and script extensions.
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {access-ext} --publisher {access-pub} --version 1.5 '
+                 '--provision-after-extensions {net-ext} {script-ext} --protected-settings "{config_file}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {access-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 2),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+            self.check('provisionAfterExtensions[1]', '{script-ext}'),
+        ])
+
+        # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_2')
     def test_vmss_extension_instance_name(self):
@@ -1409,8 +1478,8 @@ class VMDiskAttachDetachTest(ScenarioTest):
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image centos --admin-password testPassword0 --authentication-type password')
 
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1} --new --size-gb 1 --caching ReadOnly')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(storageProfile.dataDisks)', 2),
             self.check('storageProfile.dataDisks[0].name', '{disk1}'),
@@ -1429,7 +1498,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
         # ensure data disk luns are managed correctly
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1}')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(storageProfile.dataDisks)', 2),
             self.check('storageProfile.dataDisks[0].lun', 2),
@@ -1440,7 +1509,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk1}')
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('length(storageProfile.dataDisks)', 0))
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1} --caching ReadWrite --sku standard_lrs')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --caching ReadWrite --sku standard_lrs')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
@@ -1458,10 +1527,10 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku StandardSSD_LRS --data-disk-sizes-gb 1')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1} --new --size-gb 1 --sku premium_lrs')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk2}  --new --size-gb 2 --sku StandardSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --sku premium_lrs')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2}  --new --size-gb 2 --sku StandardSSD_LRS')
         self.cmd('disk create -g {rg} -n {disk3} --size-gb 4 --sku StandardSSD_LRS')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk3}')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk3}')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'StandardSSD_LRS'),
@@ -1485,8 +1554,8 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('disk show -g {rg} -n {disk1}')
         self.cmd('disk create -g {rg} -n {disk2} --size-gb 4 --sku UltraSSD_LRS')
         self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1}')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -1495,7 +1564,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
         self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm2} --disk {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm2} --name {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
@@ -1526,7 +1595,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
         self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
-        self.cmd('vmss disk attach -g {rg} -n {vmss2} --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
@@ -1701,7 +1770,7 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss} --instance-id {id}',
                  checks=self.check('instanceId', '{id}'))
 
-        self.cmd('vmss disk attach -g {rg} -n {vmss} --size-gb 3')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --size-gb 3')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1),
@@ -1709,7 +1778,7 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3),
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
-        self.cmd('vmss disk detach -g {rg} -n {vmss} --lun 1')
+        self.cmd('vmss disk detach -g {rg} --vmss-name {vmss} --lun 1')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 1),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
@@ -1768,12 +1837,12 @@ class VMSSCreateOptions(ScenarioTest):
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['instance_id'] = instances[0]['instanceId']
 
-        self.cmd('vmss disk attach -g {rg} -n {vmss} --instance-id {instance_id} --disk {disk} --caching {caching}')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --instance-id {instance_id} --disk {disk} --caching {caching}')
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 1),
             self.check('[0].storageProfile.dataDisks[0].caching', self.kwargs['caching'])
         ])
-        self.cmd('vmss disk detach -g {rg} -n {vmss} --instance-id {instance_id} --lun 0')
+        self.cmd('vmss disk detach -g {rg} --vmss-name {vmss} --instance-id {instance_id} --lun 0')
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 0)
         ])
@@ -1915,6 +1984,8 @@ class AcceleratedNetworkingTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1'
         })
+        # Note: CLI turns sets accelerated_networking to true based on vm size and os image.
+        # See _validate_vm_vmss_accelerated_networking for more info.
         self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image ubuntults --admin-username clittester --generate-ssh-keys")
         self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
 
@@ -1951,9 +2022,9 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'vault': self.create_random_name('vmlinuxkv', 20)
         })
 
-        # TODO: Re-enable when issue #5155 is resolved.
-        # message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'', expect_failure=True)
+        message = 'Secret is missing vaultCertificates array or it is empty at index 0'
+        with self.assertRaisesRegexp(CLIError, message):
+            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
 
         vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
@@ -1985,10 +2056,10 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'vault': self.create_random_name('vmkeyvault', 20)
         })
 
-        # TODO: Re-enable when issue #5155 is resolved.
-        # message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
-        #           'vaultCertificate index 0'
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\'', expect_failure=True)
+        message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
+                  'vaultCertificate index 0'
+        with self.assertRaisesRegexp(CLIError, message):
+            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\'')
 
         vault_out = self.cmd(
             'keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
@@ -2020,7 +2091,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
             'loc': 'westus',
             'vmss': 'vmss1-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': 'vmcreatelinuxsecret3334',
+            'vault': self.create_random_name('vmlinuxkv', 20),
             'secret': 'mysecret',
             'ssh_key': TEST_SSH_KEY_PUB
         })
@@ -2189,7 +2260,6 @@ class VMSSNicScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'iid': 0
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
@@ -2198,10 +2268,15 @@ class VMSSNicScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
+
+        result = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs['iid'] = result[0]['instanceId']
+
         nic_list = self.cmd('vmss nic list-vm-nics -g {rg} --vmss-name {vmss} --instance-id {iid}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ]).get_output_in_json()
+
         self.kwargs['nic'] = nic_list[0].get('name')
         self.cmd('vmss nic show --resource-group {rg} --vmss-name {vmss} --instance-id {iid} -n {nic}', checks=[
             self.check('type(@)', 'object'),
@@ -2357,6 +2432,9 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss identity remove -g {rg} -n {vmss3}')
             self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=self.is_empty())
 
+            # test that vmss identity remove does not fail when the vmss has no assigned identities.
+            self.cmd('vmss identity remove -g {rg} -n {vmss3}', checks=self.is_empty())
+
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_vm_msi_no_scope(self, resource_group):
 
@@ -2447,6 +2525,10 @@ class MSIScenarioTest(ScenarioTest):
             self.check('type', 'SystemAssigned'),
             self.check('userAssignedIdentities', None),
         ])
+
+        # remove the last assigned identity and check that remove does not fail if there are no assigned identities.
+        self.cmd('vm identity remove -g {rg} -n {vm}', checks=self.is_empty())
+        self.cmd('vm identity remove -g {rg} -n {vm}', checks=self.is_empty())
 
     @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
     def test_vmss_explicit_msi(self, resource_group):
@@ -2547,7 +2629,7 @@ class VMZoneScenarioTest(ScenarioTest):
         try:
             self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
         except Exception as ex:
-            self.assertTrue('availablity zone is not yet supported' in str(ex))
+            self.assertTrue('availability zone is not yet supported' in str(ex))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
     @AllowLargeResponse(size_kb=8192)
@@ -2671,7 +2753,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
 
         self.cmd('vm run-command list -l {loc}')
         self.cmd('vm run-command show --command-id RunShellScript -l {loc}')
-        public_ip = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --admin-password Test12345678!!').get_output_in_json()['publicIpAddress']
+        public_ip = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys').get_output_in_json()['publicIpAddress']
 
         self.cmd('vm open-port -g {rg} -n {vm} --port 80')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"')
@@ -2683,8 +2765,53 @@ class VMRunCommandScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_w_params')
     def test_vm_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vm': 'test-run-command-vm2'})
-        self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!!')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
+
+
+class VMSSRunCommandScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command')
+    def test_vmss_run_command_e2e(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'vmss': 'test-run-command-vmss',
+            'loc': resource_group_location
+        })
+
+        # Test basic run-command commands
+        self.cmd('vmss run-command list -l {loc}')
+        self.cmd('vmss run-command show --command-id RunShellScript -l {loc}')
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1 --generate-ssh-keys').get_output_in_json()
+
+        # get load balancer and allow trafic to scale sets.
+        lb = self.cmd('network lb list -g {rg}').get_output_in_json()[0]
+        self.kwargs.update({
+            'lb_name': lb['name'],
+            'lb_backend': lb['backendAddressPools'][0]['name'],
+            'lb_frontend': lb['frontendIpConfigurations'][0]['name'],
+            'lb_ip_id': lb['frontendIpConfigurations'][0]['publicIpAddress']['id']
+        })
+        self.cmd('az network lb rule create -g {rg} --name allowTrafficRule --lb-name {lb_name} --backend-pool-name {lb_backend} --frontend-ip-name {lb_frontend} --backend-port 80 --frontend-port 80 --protocol tcp')
+        public_ip = self.cmd('az network public-ip show --ids {lb_ip_id}').get_output_in_json()['ipAddress']
+        self.kwargs['instance_ids'] = " ".join(self.cmd('az vmss list-instances -n {vmss} -g {rg} --query "[].id"').get_output_in_json())
+
+        self.cmd('vmss run-command invoke --ids {instance_ids} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"')
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+
+        import requests
+        r = requests.get('http://' + public_ip)
+        self.assertTrue('Welcome to nginx' in str(r.content))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params')
+    def test_vmss_run_command_with_parameters(self, resource_group):
+        self.kwargs.update({'vmss': 'test-run-command-vmss2'})
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username clitest1 --generate-ssh-keys')
+        self.kwargs['instance_ids'] = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
+
+        for id in self.kwargs['instance_ids']:
+            self.kwargs['id'] = id
+            self.cmd('vmss run-command invoke -g {rg} -n {vmss} --instance-id {id} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
@@ -2967,15 +3094,20 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}',
-                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
+                 checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
+
         self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                  checks=self.check('length(@)', 1))
         self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
                  checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=2 {location}',
-                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=1 {location} --replica-count 2',
+                 checks=[
+                     self.check('publishingProfile.replicaCount', 2),
+                     self.check('length(publishingProfile.targetRegions)', 2),
+                     self.check('publishingProfile.targetRegions', [dict(name="West US 2", regionalReplicaCount=1), dict(name="East US 2", regionalReplicaCount=2)])
+                 ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))
 

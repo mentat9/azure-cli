@@ -19,11 +19,11 @@ import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
+
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from knack.util import CLIError
-
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
 
 from azure.mgmt.resource.resources.models import GenericResource
 
@@ -39,6 +39,8 @@ from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
     _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
+
+from ._validators import MSI_LOCAL_ID
 
 logger = get_logger(__name__)
 
@@ -56,6 +58,15 @@ def _process_parameters(template_param_defs, parameter_lists):
         if os.path.isfile(value):
             parsed = get_file_json(value, throw_on_empty=False)
             return parsed.get('parameters', parsed)
+        return None
+
+    def _try_load_uri(value):
+        if "://" in value:
+            try:
+                parsed = shell_safe_json_parse(_urlretrieve(value).decode('utf-8'))
+                return parsed.get('parameters', parsed)
+            except Exception:  # pylint: disable=broad-except
+                pass
         return None
 
     def _try_parse_key_value_object(template_param_defs, parameters, value):
@@ -93,7 +104,7 @@ def _process_parameters(template_param_defs, parameter_lists):
     parameters = {}
     for params in parameter_lists or []:
         for item in params:
-            param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
+            param_obj = _try_load_file_object(item) or _try_parse_json_object(item) or _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
             elif not _try_parse_key_value_object(template_param_defs, parameters, item):
@@ -128,7 +139,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
     no_tty = False
     for param_name in prompt_list:
         param = missing_parameters[param_name]
-        param_type = param.get('type', 'string')
+        param_type = param.get('type', 'string').lower()
         description = 'Missing description'
         metadata = param.get('metadata', None)
         if metadata is not None:
@@ -221,7 +232,7 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_core(cli_ctx, resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, rollback_on_error=None, validate_only=False,
                               no_wait=False):
@@ -262,7 +273,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def _deploy_arm_template_subscription_scope(cli_ctx,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_subscription_scope(cli_ctx,
                                             template_file=None, template_uri=None,
                                             deployment_name=None, deployment_location=None,
                                             parameters=None, mode=None, validate_only=False,
@@ -434,7 +445,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
     if file_or_string_or_uri is None:
         if required:
-            raise CLIError('One of --{} or --{}-uri is required'.format(name, name))
+            raise CLIError('--{} is required'.format(name))
         return None
     url = urlparse(file_or_string_or_uri)
     if url.scheme == 'http' or url.scheme == 'https' or url.scheme == 'file':
@@ -765,17 +776,17 @@ def _get_parsed_resource_ids(resource_ids):
         if not is_valid_resource_id(rid):
             raise CLIError('az resource: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
 
-    return (parse_resource_id(rid) for rid in resource_ids)
+    return ({'resource_id': rid} for rid in resource_ids)
 
 
 def _get_rsrc_util_from_parsed_id(cli_ctx, parsed_id, api_version):
     return _ResourceUtils(cli_ctx,
-                          parsed_id['resource_group'],
-                          parsed_id['resource_namespace'],
-                          parsed_id['resource_parent'],
-                          parsed_id['resource_type'],
-                          parsed_id['resource_name'],
-                          None,
+                          parsed_id.get('resource_group', None),
+                          parsed_id.get('resource_namespace', None),
+                          parsed_id.get('resource_parent', None),
+                          parsed_id.get('resource_type', None),
+                          parsed_id.get('resource_name', None),
+                          parsed_id.get('resource_id', None),
                           api_version)
 
 
@@ -982,9 +993,9 @@ def move_resource(cmd, ids, destination_group, destination_subscription_id=None)
         else:
             raise CLIError('Invalid id "{}", as it has no group or subscription field'.format(i))
 
-    if len(set([r['subscription'] for r in resources])) > 1:
+    if len({r['subscription'] for r in resources}) > 1:
         raise CLIError('All resources should be under the same subscription')
-    if len(set([r['resource_group'] for r in resources])) > 1:
+    if len({r['resource_group'] for r in resources}) > 1:
         raise CLIError('All resources should be under the same group')
 
     rcf = _resource_client_factory(cmd.cli_ctx)
@@ -1010,7 +1021,8 @@ def register_feature(client, resource_provider_namespace, feature_name):
 def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
-                             not_scopes=None):
+                             not_scopes=None, location=None, assign_identity=None,
+                             identity_scope=None, identity_role='Contributor'):
     """Creates a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
@@ -1021,12 +1033,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     policy_id = _resolve_policy_id(cmd, policy, policy_set_definition, policy_client)
-
-    if params:
-        if os.path.exists(params):
-            params = get_file_json(params)
-        else:
-            params = shell_safe_json_parse(params)
+    params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
     assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope)
@@ -1049,9 +1056,32 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             policySku = policySku if sku.lower() == 'free' else PolicySku(name='A1', tier='Standard')
         assignment.sku = policySku
 
-    return policy_client.policy_assignments.create(scope,
-                                                   name or uuid.uuid4(),
-                                                   assignment)
+    if cmd.supported_api_version(min_api='2018-05-01'):
+        if location:
+            assignment.location = location
+        identity = None
+        if assign_identity is not None:
+            identity = _build_identities_info(cmd, assign_identity)
+        assignment.identity = identity
+
+    createdAssignment = policy_client.policy_assignments.create(scope, name or uuid.uuid4(), assignment)
+
+    # Create the identity's role assignment if requested
+    if assign_identity is not None and identity_scope:
+        from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
+        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
+
+    return createdAssignment
+
+
+def _build_identities_info(cmd, identities):
+    identities = identities or []
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    identity_type = ResourceIdentityType.none
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_type = ResourceIdentityType.system_assigned
+    ResourceIdentity = cmd.get_models('Identity')
+    return ResourceIdentity(type=identity_type)
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
@@ -1103,6 +1133,40 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
         result = [i for i in result if _scope.lower() == i.scope.lower()]
 
     return result
+
+
+def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+
+    def getter():
+        return policy_client.policy_assignments.get(scope, name)
+
+    def setter(policyAssignment):
+        policyAssignment.identity = _build_identities_info(cmd, [MSI_LOCAL_ID])
+        return policy_client.policy_assignments.create(scope, name, policyAssignment)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
+    updatedAssignment = _assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role, identity_scope)
+    return updatedAssignment.identity
+
+
+def show_identity(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+    return policy_client.policy_assignments.get(scope, name).identity
+
+
+def remove_identity(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+    policyAssignment = policy_client.policy_assignments.get(scope, name)
+
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    ResourceIdentity = cmd.get_models('Identity')
+    policyAssignment.identity = ResourceIdentity(type=ResourceIdentityType.none)
+    policyAssignment = policy_client.policy_assignments.create(scope, name, policyAssignment)
+    return policyAssignment.identity
 
 
 def enforce_mutually_exclusive(subscription, management_group):
@@ -1220,6 +1284,9 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
                              display_name=None, description=None, metadata=None, mode=None,
                              subscription=None, management_group=None):
 
+    rules = _load_file_string_or_uri(rules, 'rules', False)
+    params = _load_file_string_or_uri(params, 'params', False)
+
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
     # pylint: disable=line-too-long,no-member
@@ -1249,17 +1316,8 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
                                 display_name=None, description=None,
                                 subscription=None, management_group=None):
 
-    if definitions:
-        if os.path.exists(definitions):
-            definitions = get_file_json(definitions)
-        else:
-            definitions = shell_safe_json_parse(definitions)
-
-    if params:
-        if os.path.exists(params):
-            params = get_file_json(params)
-        else:
-            params = shell_safe_json_parse(params)
+    definitions = _load_file_string_or_uri(definitions, 'definitions', False)
+    params = _load_file_string_or_uri(params, 'params', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
@@ -1301,7 +1359,7 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
     profile = Profile(cli_ctx=cli_ctx)
     subscriptions_list = profile.load_cached_subscriptions()
     for sub in subscriptions_list:
-        if sub['id'] == subscription or sub['name'] == subscription:
+        if subscription in (sub['id'], sub['name']):
             return sub['id']
     raise CLIError("Subscription not found in the current context.")
 
@@ -1660,10 +1718,9 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
         lock_list = list_locks(resource_group, resource_provider_namespace, parent_resource_path,
                                resource_type, resource_name)
         return next((lock for lock in lock_list if lock.name == lock_name), None)
-    else:
-        params = lock_client.management_locks.get_at_resource_level(
-            resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
-            resource_name, lock_name)
+    params = lock_client.management_locks.get_at_resource_level(
+        resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
+        resource_name, lock_name)
     _update_lock_parameters(params, level, notes)
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
@@ -1751,7 +1808,11 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         self.api_version = api_version
 
     def create_resource(self, properties, location, is_full_object):
-        res = json.loads(properties)
+        try:
+            res = json.loads(properties)
+        except json.decoder.JSONDecodeError as ex:
+            raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
+
         if not is_full_object:
             if not location:
                 if self.resource_id:
@@ -1847,6 +1908,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         Formats Url if none provided and sends the POST request with the url and request-body.
         """
         from msrestazure.azure_operation import AzureOperationPoller
+
         query_parameters = {}
         serialize = self.rcf.resources._serialize  # pylint: disable=protected-access
         client = self.rcf.resources._client  # pylint: disable=protected-access
@@ -1854,20 +1916,26 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
             '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
 
-        url = client.format_url(
-            url,
-            resourceGroupName=serialize.url(
-                "resource_group_name", self.resource_group_name, 'str',
-                max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
-            resourceProviderNamespace=serialize.url(
-                "resource_provider_namespace", self.resource_provider_namespace, 'str'),
-            parentResourcePath=serialize.url(
-                "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
-            resourceType=serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
-            resourceName=serialize.url("resource_name", self.resource_name, 'str'),
-            subscriptionId=serialize.url(
-                "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
-            action=serialize.url("action", action, 'str'))
+        if self.resource_id:
+            url = client.format_url(
+                '{resource_id}/{action}',
+                resource_id=self.resource_id,
+                action=serialize.url("action", action, 'str'))
+        else:
+            url = client.format_url(
+                url,
+                resourceGroupName=serialize.url(
+                    "resource_group_name", self.resource_group_name, 'str',
+                    max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+                resourceProviderNamespace=serialize.url(
+                    "resource_provider_namespace", self.resource_provider_namespace, 'str'),
+                parentResourcePath=serialize.url(
+                    "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
+                resourceType=serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
+                resourceName=serialize.url("resource_name", self.resource_name, 'str'),
+                subscriptionId=serialize.url(
+                    "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
+                action=serialize.url("action", action, 'str'))
 
         # Construct parameters
         query_parameters['api-version'] = serialize.query("api_version", self.api_version, 'str')
@@ -1918,10 +1986,9 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         if len(rt) == 1 and rt[0].api_versions:
             npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
             return npv[0] if npv else rt[0].api_versions[0]
-        else:
-            raise IncorrectUsageError(
-                'API version is required and could not be resolved for resource {}'
-                .format(resource_type))
+        raise IncorrectUsageError(
+            'API version is required and could not be resolved for resource {}'
+            .format(resource_type))
 
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):

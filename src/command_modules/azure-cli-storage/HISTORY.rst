@@ -2,10 +2,21 @@
 
 Release History
 ===============
+2.3.1
++++++
+* Changed fix to update only properties that are changed on the same object
+*  Fixed #8021, binary data is encoded in base 64 when returned
+
+2.3.0
++++++
+* BREAKING CHANGE: `storage blob/file/container/share list`- Limit default number of results returned to be 5,000.
+  Use `--num-results *` for original behavior of returning all results.
+* `storage blob/file/container/share list`- log marker for next page to STDERR and expose `--marker` parameter.
+* Add `storage blob service-properties update` command with support for static websites.
 
 2.2.7
 +++++
-* Minor fixes.
+* `storage logging update`- Add ability to update log schema version for storage services.
 
 2.2.6
 +++++

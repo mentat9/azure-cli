@@ -11,14 +11,16 @@ import json
 import re
 import os
 import uuid
+import itertools
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
+
+from msrest.serialization import TZ_UTC
+from msrestazure.azure_exceptions import CloudError
 
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
-from msrest.serialization import TZ_UTC
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.profiles import ResourceType, get_api_version
 from azure.graphrbac.models import GraphErrorException
 
@@ -26,7 +28,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
                                     KeyCredential, UserCreateParameters, PasswordProfile,
-                                    ServicePrincipalCreateParameters, RequiredResourceAccess,
+                                    ServicePrincipalCreateParameters, RequiredResourceAccess, AppRole,
                                     ResourceAccess, GroupCreateParameters, CheckGroupMembershipParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
@@ -308,7 +310,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
             result.append(entry)
 
     # Fill in logical user/sp names as guid principal-id not readable
-    principal_ids = set([x['principalId'] for x in result if x['principalId']])
+    principal_ids = {x['principalId'] for x in result if x['principalId']}
     if principal_ids:
         graph_client = _graph_client_factory(cmd.cli_ctx)
         stubs = _get_object_stubs(graph_client, principal_ids)
@@ -389,7 +391,7 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
 def _get_displayable_name(graph_object):
     if getattr(graph_object, 'user_principal_name', None):
         return graph_object.user_principal_name
-    elif getattr(graph_object, 'service_principal_names', None):
+    if getattr(graph_object, 'service_principal_names', None):
         return graph_object.service_principal_names[0]
     return graph_object.display_name or ''
 
@@ -487,7 +489,11 @@ def _resolve_role_id(role, scope, definitions_client):
     return role_id
 
 
-def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query_filter=None):
+def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_filter=None, include_all=None,
+              show_mine=None):
+    client = _graph_client_factory(cmd.cli_ctx)
+    if show_mine:
+        return list_owned_objects(client.signed_in_user, 'application')
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)
@@ -498,12 +504,15 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
-    if not sub_filters:
-        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
-                       ' 100 objects to minimize wait times. You can still use --all for the old behavior,'
-                       ' though it is not recommended')
+    result = client.applications.list(filter=(' and '.join(sub_filters)))
+    if sub_filters or include_all:
+        return result
 
-    return client.list(filter=(' and '.join(sub_filters)))
+    result = list(itertools.islice(result, 101))
+    if len(result) == 101:
+        logger.warning("The result is not complete. You can still use '--all' to get all of them with"
+                       " long latency expected, or provide a filter through command arguments")
+    return result[:100]
 
 
 def list_application_owners(cmd, identifier):
@@ -522,7 +531,11 @@ def remove_application_owner(cmd, owner_object_id, identifier):
     return client.remove_owner(_resolve_application(client, identifier), owner_object_id)
 
 
-def list_sps(client, spn=None, display_name=None, query_filter=None):
+def list_sps(cmd, spn=None, display_name=None, query_filter=None, show_mine=None, include_all=None):
+    client = _graph_client_factory(cmd.cli_ctx)
+    if show_mine:
+        return list_owned_objects(client.signed_in_user, 'servicePrincipal')
+
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)
@@ -531,17 +544,22 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    if not sub_filters:
-        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
-                       ' 100 objects to to minimize wait times. You can still use --all for the old behavior,'
-                       ' though it is not recommended')
-    return client.list(filter=(' and '.join(sub_filters)))
+    result = client.service_principals.list(filter=(' and '.join(sub_filters)))
+
+    if sub_filters or include_all:
+        return result
+
+    result = list(itertools.islice(result, 101))
+    if len(result) == 101:
+        logger.warning("The result is not complete. You can still use '--all' to get all of them with"
+                       " long latency expected, or provide a filter through command arguments")
+    return result[:100]
 
 
 def list_owned_objects(client, object_type=None):
     result = client.list_owned_objects()
     if object_type:
-        result = [r for r in result if r.object_type.lower() == object_type.lower()]
+        result = [r for r in result if r.object_type and r.object_type.lower() == object_type.lower()]
     return result
 
 
@@ -645,7 +663,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None,
-                       credential_description=None):
+                       credential_description=None, app_roles=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
     if native_app:
@@ -661,6 +679,9 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
 
+    if app_roles:
+        app_roles = _build_app_roles(app_roles)
+
     app_patch_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
                                                   display_name=display_name,
                                                   identifier_uris=identifier_uris,
@@ -669,7 +690,8 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
                                                   key_credentials=key_creds,
                                                   password_credentials=password_creds,
                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
-                                                  required_resource_access=required_accesses)
+                                                  required_resource_access=required_accesses,
+                                                  app_roles=app_roles)
 
     try:
         result = graph_client.applications.create(app_patch_param)
@@ -788,7 +810,7 @@ def grant_application(cmd, identifier, api, expires='1', scope='user_impersonati
 def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, app_roles=None):
     from azure.cli.core.commands.arm import make_camel_case, make_snake_case
     password_creds, key_creds, required_accesses = None, None, None
     if any([password, key_value]):
@@ -797,6 +819,9 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
 
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
+
+    if app_roles:
+        app_roles = _build_app_roles(app_roles)
 
     # Workaround until https://github.com/Azure/azure-rest-api-specs/issues/3437 is fixed
     def _get_property(name):
@@ -814,7 +839,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         password_credentials=password_creds or None,
         available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
         required_resource_access=required_accesses or _get_property('required_resource_access'),
-        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
+        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'),
+        app_roles=app_roles)
 
     return app_patch_param
 
@@ -826,14 +852,32 @@ def patch_application(cmd, identifier, parameters):
 
 
 def _build_application_accesses(required_resource_accesses):
-    required_accesses = None
+    if not required_resource_accesses:
+        return None
+    required_accesses = []
+    if isinstance(required_resource_accesses, dict):
+        logger.info('Getting "requiredResourceAccess" from a full manifest')
+        required_resource_accesses = required_resource_accesses.get('requiredResourceAccess', [])
     for x in required_resource_accesses:
         accesses = [ResourceAccess(id=y['id'], type=y['type']) for y in x['resourceAccess']]
-        if required_accesses is None:
-            required_accesses = []
         required_accesses.append(RequiredResourceAccess(resource_app_id=x['resourceAppId'],
                                                         resource_access=accesses))
     return required_accesses
+
+
+def _build_app_roles(app_roles):
+    if not app_roles:
+        return None
+    result = []
+    if isinstance(app_roles, dict):
+        logger.info('Getting "appRoles" from a full manifest')
+        app_roles = app_roles.get('appRoles', [])
+    for x in app_roles:
+        role = AppRole(id=x.get('id', None) or _gen_guid(), allowed_member_types=x.get('allowedMemberTypes', None),
+                       description=x.get('description', None), display_name=x.get('displayName', None),
+                       is_enabled=x.get('isEnabled', None), value=x.get('value', None))
+        result.append(role)
+    return result
 
 
 def show_application(client, identifier):
@@ -989,9 +1033,9 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
         if cert:
             return graph_client.applications.update_key_credentials(app_object_id, result)
         return graph_client.applications.update_password_credentials(app_object_id, result)
-    else:
-        raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
-            key_id, identifier))
+
+    raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
+        key_id, identifier))
 
 
 def _resolve_service_principal(client, identifier):
@@ -1001,8 +1045,7 @@ def _resolve_service_principal(client, identifier):
         return result[0].object_id
     if _is_guid(identifier):
         return identifier  # assume an object id
-    else:
-        raise CLIError("service principal '{}' doesn't exist".format(identifier))
+    raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
 def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
@@ -1489,6 +1532,14 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
         setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
-# for injecting test seams to produce predicatable role assignment id for playback
+# for injecting test seems to produce predicatable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
+
+
+def list_user_assigned_identities(cmd, resource_group_name=None):
+    from azure.cli.command_modules.role._client_factory import _msi_client_factory
+    client = _msi_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
+    return client.user_assigned_identities.list_by_subscription()

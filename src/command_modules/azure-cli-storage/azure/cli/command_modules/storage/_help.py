@@ -54,7 +54,7 @@ helps['storage file upload'] = """
     long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
     examples:
         - name: Upload to a local file to a share.
-          text: az storage file upload -s MyShare -source /path/to/file
+          text: az storage file upload -s MyShare --source /path/to/file
 """
 
 helps['storage blob show'] = """
@@ -241,6 +241,11 @@ helps['storage blob metadata'] = """
 helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
+"""
+
+helps['storage blob service-properties update'] = """
+    type: command
+    short-summary: Update storage blob service properties.
 """
 
 helps['storage blob service-properties delete-policy'] = """
@@ -701,6 +706,8 @@ helps['storage logging update'] = """
           short-summary: 'The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.'
         - name: --retention
           short-summary: Number of days for which to retain logs. 0 to disable.
+        - name: --version
+          short-summary: Version of the logging schema.
 """
 
 helps['storage message'] = """

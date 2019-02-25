@@ -3,6 +3,25 @@
 Release History
 ===============
 
+* `container start/restart`: Added `--no-wait` argument.
+
+0.3.13
+++++++
+* Adding 'az container start' command
+* Allow using decimal values for CPU during container creation
+
+0.3.12
+++++++
+* Updating dependencies
+
+0.3.11
+++++++
+* Updating dependencies
+
+0.3.10
+++++++
+* Minor fixes
+
 0.3.9
 +++++
 * Minor fixes

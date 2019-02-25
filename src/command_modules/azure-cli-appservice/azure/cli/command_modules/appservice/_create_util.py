@@ -11,7 +11,7 @@ from azure.mgmt.resource.resources.models import ResourceGroup
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
                          DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT)
+                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT)
 
 
 def _resource_client_factory(cli_ctx, **_):
@@ -95,23 +95,23 @@ def _check_resource_group_supports_os(cmd, rg_name, is_linux):
     return True
 
 
-def check_if_asp_exists(cmd, rg_name, asp_name, location):
+def should_create_new_asp(cmd, rg_name, asp_name, location):
     # get all appservice plans from RG
     client = web_client_factory(cmd.cli_ctx)
     for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
         if (item.name.lower() == asp_name.lower() and
                 item.location.replace(" ", "").lower() == location or
                 item.location == location):
-            return True
-    return False
+            return False
+    return True
 
 
-def check_app_exists(cmd, rg_name, app_name):
+def should_create_new_app(cmd, rg_name, app_name):
     client = web_client_factory(cmd.cli_ctx)
     for item in list(client.web_apps.list_by_resource_group(rg_name)):
         if item.name.lower() == app_name.lower():
-            return True
-    return False
+            return False
+    return True
 
 
 # pylint:disable=unexpected-keyword-arg
@@ -129,11 +129,11 @@ def get_lang_from_content(src_path):
     if os.path.isfile(package_json_file):
         runtime_details_dict['language'] = NODE_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_json_file
-        runtime_details_dict['default_sku'] = 'B1'
+        runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_python_file:
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = os.path.join(src_path, package_json_file[0])
-        runtime_details_dict['default_sku'] = 'B1'
+        runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_netlang_glob:
         package_netcore_file = os.path.join(src_path, package_netlang_glob[0])
         runtime_lang = detect_dotnet_lang(package_netcore_file)
@@ -252,10 +252,8 @@ def set_location(cmd, sku, location):
         available_locs = []
         for loc in locs:
             available_locs.append(loc.name)
-        location = available_locs[0]
-    else:
-        location = location
-    return location.replace(" ", "").lower()
+        return available_locs[0]
+    return location
 
 
 def should_create_new_rg(cmd, default_rg, rg_name, is_linux):

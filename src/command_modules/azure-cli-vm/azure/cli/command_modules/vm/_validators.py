@@ -288,15 +288,15 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
-    elif profile == StorageProfile.SAPirImage:
+    if profile == StorageProfile.SAPirImage:
         return 'create unmanaged OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.SASpecializedOSDisk:
+    if profile == StorageProfile.SASpecializedOSDisk:
         return 'attach to existing unmanaged OS disk'
-    elif profile == StorageProfile.ManagedCustomImage:
+    if profile == StorageProfile.ManagedCustomImage:
         return 'create managed OS disk from custom image'
-    elif profile == StorageProfile.ManagedPirImage:
+    if profile == StorageProfile.ManagedPirImage:
         return 'create managed OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.ManagedSpecializedOSDisk:
+    if profile == StorageProfile.ManagedSpecializedOSDisk:
         return 'attach existing managed OS disk'
 
 
@@ -311,7 +311,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
             if not hasattr(temp, 'location_info'):
                 return
             if not temp or not [x for x in (temp.location_info or []) if x.zones]:
-                raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
+                raise CLIError("{}'s location can't be used to create the VM/VMSS because availability zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
                                "used to find such locations".format(namespace.resource_group_name))
 
@@ -417,6 +417,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
+        namespace.aux_subscriptions = [res['subscription']]
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
@@ -660,13 +661,14 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
                 return
 
         # VMs need to be a supported image in the marketplace
-        # Ubuntu 16.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
+        # Ubuntu 16.04 | 18.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
         # Oracle Linux 7.4, Windows Server 2016, Windows Server 2012R2
         publisher, offer, sku = namespace.os_publisher, namespace.os_offer, namespace.os_sku
         if not publisher:
             return
         publisher, offer, sku = publisher.lower(), offer.lower(), sku.lower()
-        distros = [('canonical', 'UbuntuServer', '^16.04'), ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
+        distros = [('canonical', 'UbuntuServer', '^16.04|^18.04'),
+                   ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
                    ('openlogic', 'centos', '^7.4'), ('coreos', 'coreos', None), ('credativ', 'debian', '-backports'),
                    ('oracle', 'oracle-linux', '^7.4'), ('MicrosoftWindowsServer', 'WindowsServer', '^2016'),
                    ('MicrosoftWindowsServer', 'WindowsServer', '^2012-R2')]
@@ -1211,6 +1213,9 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
+
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
@@ -1256,20 +1261,27 @@ def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
     from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
+    source_from_vm = False
     try:
         # try capturing from VM, a most common scenario
         res_id = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
-        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+        if res['type'] == 'virtualMachines':
+            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
+            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+            source_from_vm = True
+    except CloudError:
+        pass
+
+    if source_from_vm:
         # pylint: disable=no-member
         namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
-    except CloudError:
+    else:
         namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
@@ -1342,12 +1354,6 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            'Microsoft.ManagedIdentity')
 
 
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def process_msi_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
-
-
 def process_gallery_image_version_namespace(cmd, namespace):
     TargetRegion = cmd.get_models('TargetRegion')
     if namespace.target_regions:
@@ -1364,3 +1370,12 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count))
         namespace.target_regions = regions_info
 # endregion
+
+
+def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
+    if "vmss" in cmd.name:
+        logger.warning("About to power off the VMSS instances...\nThey will continue to be billed. "
+                       "To deallocate VMSS instances, run: az vmss deallocate.")
+    else:
+        logger.warning("About to power off the specified VM...\nIt will continue to be billed. "
+                       "To deallocate a VM, run: az vm deallocate.")

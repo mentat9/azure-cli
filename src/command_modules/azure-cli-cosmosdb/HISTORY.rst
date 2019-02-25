@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.2.8
++++++
+* Introduce `network-rule` subgroup with commands `add`, `remove`, and `list` for managing VNET rules of a Cosmos DB account
+
+0.2.7
++++++
+* Added support for creating database with shared throughput
+
+0.2.6 
++++++ 
+* Added support for updating account from multi-master to single-master
+
 0.2.5
 +++++
 * Use latest azure-mgmt-cosmosdb pypi package (0.5.2)

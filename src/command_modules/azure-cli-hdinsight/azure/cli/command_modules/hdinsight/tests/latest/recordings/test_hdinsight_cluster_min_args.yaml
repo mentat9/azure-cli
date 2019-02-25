@@ -1,28 +1,27 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-11-17T00:01:25Z"}}'
+    body: '{"location": "eastus2", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2019-01-17T09:25:56Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['110']
+      Content-Length: ['111']
       Content-Type: [application/json; charset=utf-8]
       ParameterSetName: [--location --name --tag]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.51]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/hdicli-000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001","name":"hdicli-000001","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2018-11-17T00:01:25Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001","name":"hdicli-000001","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2019-01-17T09:25:56Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['258']
+      content-length: ['259']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:01:29 GMT']
+      date: ['Thu, 17 Jan 2019 09:26:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -30,17 +29,17 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "eastus"}'
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "eastus2"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [storage account create]
       Connection: [keep-alive]
-      Content-Length: ['74']
+      Content-Length: ['75']
       Content-Type: [application/json; charset=utf-8]
       ParameterSetName: [-n -g -l --sku]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002?api-version=2018-07-01
@@ -50,15 +49,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['0']
       content-type: [text/plain; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:01:31 GMT']
+      date: ['Thu, 17 Jan 2019 09:26:09 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/ad9a5949-6d1a-41ba-8185-c23a83383104?monitor=true&api-version=2018-07-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2/asyncoperations/d398f46e-f727-41bf-9dc8-a56ab8d4389b?monitor=true&api-version=2018-07-01']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
           Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -68,17 +67,17 @@ interactions:
       CommandName: [storage account create]
       Connection: [keep-alive]
       ParameterSetName: [-n -g -l --sku]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/ad9a5949-6d1a-41ba-8185-c23a83383104?monitor=true&api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2/asyncoperations/d398f46e-f727-41bf-9dc8-a56ab8d4389b?monitor=true&api-version=2018-07-01
   response:
-    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-11-17T00:01:31.7715932Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-11-17T00:01:31.7715932Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-11-17T00:01:31.6778821Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}}'}
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-01-17T09:26:08.9942547Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-01-17T09:26:08.9942547Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-01-17T09:26:08.8223779Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1106']
+      content-length: ['1108']
       content-type: [application/json]
-      date: ['Sat, 17 Nov 2018 00:01:49 GMT']
+      date: ['Thu, 17 Jan 2019 09:26:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -97,20 +96,18 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       ParameterSetName: [-n -g --query -o]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2018-07-01
   response:
-    body: {string: '{"keys": [{"keyName": "key1", "value": "veryFakedStorageAccountKey==",
-        "permissions": "FULL"}, {"keyName": "key2", "value": "veryFakedStorageAccountKey==",
-        "permissions": "FULL"}]}'}
+    body: {string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['288']
       content-type: [application/json]
-      date: ['Sat, 17 Nov 2018 00:01:50 GMT']
+      date: ['Thu, 17 Jan 2019 09:26:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -119,7 +116,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -128,19 +125,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002?api-version=2018-07-01
   response:
-    body: {string: '{"value":[{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-11-17T00:01:31.7715932Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-11-17T00:01:31.7715932Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-11-17T00:01:31.6778821Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}}]}'}
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-01-17T09:26:08.9942547Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-01-17T09:26:08.9942547Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-01-17T09:26:08.8223779Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1118']
+      content-length: ['1108']
       content-type: [application/json]
-      date: ['Sat, 17 Nov 2018 00:01:51 GMT']
+      date: ['Thu, 17 Jan 2019 09:26:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -158,21 +155,19 @@ interactions:
       CommandName: [hdinsight create]
       Connection: [keep-alive]
       Content-Length: ['0']
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2018-07-01
   response:
-    body: {string: '{"keys": [{"keyName": "key1", "value": "veryFakedStorageAccountKey==",
-        "permissions": "FULL"}, {"keyName": "key2", "value": "veryFakedStorageAccountKey==",
-        "permissions": "FULL"}]}'}
+    body: {string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['288']
       content-type: [application/json]
-      date: ['Sat, 17 Nov 2018 00:01:52 GMT']
+      date: ['Thu, 17 Jan 2019 09:26:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -181,10 +176,10 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"location": "eastus", "properties": {"clusterVersion": "default",
+    body: 'b''b\''{"location": "eastus2", "properties": {"clusterVersion": "default",
       "osType": "Linux", "clusterDefinition": {"kind": "spark", "configurations":
       {"gateway": {"restAuthCredential.isEnabled": "true", "restAuthCredential.username":
       "admin", "restAuthCredential.password": "Password1!"}}}, "computeProfile": {"roles":
@@ -194,41 +189,40 @@ interactions:
       "hardwareProfile": {"vmSize": "large"}, "osProfile": {"linuxOperatingSystemProfile":
       {"username": "sshuser", "password": "Password1!"}}}]}, "storageProfile": {"storageaccounts":
       [{"name": "hdicli000002.blob.core.windows.net", "isDefault": true, "container":
-      "hdicli-000003", "key": "bxiku3IN+2yX+c4GA9aHa6hF7kp7wxfKnVBTanxIoqw+MEzHAlCtYW3At3B3fZY1Yreh49XaoZ/CXW0J6uUscA=="}]}}}\'''''
+      "hdicli-000003", "key": "veryFakedStorageAccountKey=="}]}}, "identity": {"type":
+      "SystemAssigned"}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      Content-Length: ['939']
+      Content-Length: ['980']
       Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US","etag":"22302828-3a18-4278-942a-ea5c40040c09","tags":null,"properties":{"clusterVersion":"3.6.1000.67","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.1810270004.json","kind":"spark","componentVersion":{"spark":"2.3"}},"computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2018-11-17T00:01:58.477","quotaInfo":{"coresUsed":20},"tier":"standard"}}'}
+        US 2","etag":"010ac3a5-0328-45b7-8d53-40d17a9c3201","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.1901050618.json","kind":"spark","componentVersion":{"spark":"2.3"}},"computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2019-01-17T09:26:38.727","quotaInfo":{"coresUsed":20},"tier":"standard"},"identity":{"type":"SystemAssigned","principalId":"c2aa99f0-0605-4335-b9b6-a42de7bc89e7","tenantId":"0cd3df99-e02f-4fd8-a7d8-3b19eeadaba5","userAssignedIdentities":{}}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview']
+      azure-asyncoperation: ['https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview']
       cache-control: [no-cache]
-      content-length: ['1031']
+      content-length: ['1224']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:01:58 GMT']
-      etag: ['"22302828-3a18-4278-942a-ea5c40040c09"']
+      date: ['Thu, 17 Jan 2019 09:26:38 GMT']
+      etag: ['"010ac3a5-0328-45b7-8d53-40d17a9c3201"']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-clusteruri: ['https://management.azure.com/subscriptions/00977cdb-163f-435f-9c32-39ec8ae61f4d/resourceGroups/hdicli-u5q7i/providers/Microsoft.HDInsight/clusters/hdicli-esgqucudg?api-version=2015-03-01-preview']
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-hdi-clusteruri: ['https://management.azure.com/subscriptions/f5d3a199-7c91-4db1-b074-8b45561beadb/resourceGroups/hdicli-xjuye/providers/Microsoft.HDInsight/clusters/hdicli-r7wwua3sd?api-version=2018-06-01-preview']
+      x-ms-hdi-served-by: [southcentralus]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -237,27 +231,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:02:29 GMT']
+      date: ['Thu, 17 Jan 2019 09:27:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -266,27 +258,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:03:00 GMT']
+      date: ['Thu, 17 Jan 2019 09:27:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -295,27 +285,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:03:31 GMT']
+      date: ['Thu, 17 Jan 2019 09:28:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -324,27 +312,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:04:02 GMT']
+      date: ['Thu, 17 Jan 2019 09:28:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -353,27 +339,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:04:33 GMT']
+      date: ['Thu, 17 Jan 2019 09:29:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -382,27 +366,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:05:05 GMT']
+      date: ['Thu, 17 Jan 2019 09:29:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -411,27 +393,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:05:36 GMT']
+      date: ['Thu, 17 Jan 2019 09:30:17 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -440,27 +420,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:06:07 GMT']
+      date: ['Thu, 17 Jan 2019 09:30:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -469,27 +447,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:06:38 GMT']
+      date: ['Thu, 17 Jan 2019 09:31:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -498,27 +474,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:07:09 GMT']
+      date: ['Thu, 17 Jan 2019 09:31:51 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -527,27 +501,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:07:40 GMT']
+      date: ['Thu, 17 Jan 2019 09:32:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -556,27 +528,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:08:11 GMT']
+      date: ['Thu, 17 Jan 2019 09:32:55 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -585,27 +555,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:08:41 GMT']
+      date: ['Thu, 17 Jan 2019 09:33:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -614,27 +582,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:09:13 GMT']
+      date: ['Thu, 17 Jan 2019 09:33:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -643,27 +609,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:09:44 GMT']
+      date: ['Thu, 17 Jan 2019 09:34:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -672,27 +636,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:10:15 GMT']
+      date: ['Thu, 17 Jan 2019 09:35:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -701,27 +663,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:10:45 GMT']
+      date: ['Thu, 17 Jan 2019 09:35:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -730,27 +690,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:11:16 GMT']
+      date: ['Thu, 17 Jan 2019 09:36:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -759,27 +717,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:11:48 GMT']
+      date: ['Thu, 17 Jan 2019 09:36:35 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -788,27 +744,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:12:18 GMT']
+      date: ['Thu, 17 Jan 2019 09:37:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -817,27 +771,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:12:50 GMT']
+      date: ['Thu, 17 Jan 2019 09:37:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -846,27 +798,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:13:21 GMT']
+      date: ['Thu, 17 Jan 2019 09:38:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -875,27 +825,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:13:52 GMT']
+      date: ['Thu, 17 Jan 2019 09:38:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -904,27 +852,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:14:22 GMT']
+      date: ['Thu, 17 Jan 2019 09:39:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -933,27 +879,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:14:54 GMT']
+      date: ['Thu, 17 Jan 2019 09:39:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -962,27 +906,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:15:25 GMT']
+      date: ['Thu, 17 Jan 2019 09:40:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -991,27 +933,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:15:56 GMT']
+      date: ['Thu, 17 Jan 2019 09:40:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1020,27 +960,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:16:27 GMT']
+      date: ['Thu, 17 Jan 2019 09:41:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1049,27 +987,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:16:57 GMT']
+      date: ['Thu, 17 Jan 2019 09:41:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1078,27 +1014,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"InProgress"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['23']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:17:29 GMT']
+      date: ['Thu, 17 Jan 2019 09:42:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1107,27 +1041,268 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:42:50 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:43:21 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:43:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:44:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:44:54 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:45:26 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:45:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:46:29 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body: {string: '{"status":"InProgress"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['23']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 17 Jan 2019 09:47:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-hdi-served-by: [southcentralus]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [hdinsight create]
+      Connection: [keep-alive]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:18:00 GMT']
+      date: ['Thu, 17 Jan 2019 09:47:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1136,28 +1311,26 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [hdinsight create]
       Connection: [keep-alive]
-      ParameterSetName: [-n -g -l -p --storage-account]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      ParameterSetName: [-n -g -l -p -t --storage-account]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US","etag":"22302828-3a18-4278-942a-ea5c40040c09","tags":null,"properties":{"clusterVersion":"3.6.1000.67","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.1810270004.json","kind":"spark","componentVersion":{"spark":"2.3"}},"computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"Medium"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2018-11-17T00:01:58.477","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard"}}'}
+        US 2","etag":"010ac3a5-0328-45b7-8d53-40d17a9c3201","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3005-27","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.1901050618.json","kind":"spark","componentVersion":{"spark":"2.3"}},"computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"Medium"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2019-01-17T09:26:38.727","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard"},"identity":{"type":"SystemAssigned","principalId":"20975b3b-500d-4b91-9af3-96bec20a104e","tenantId":"0cd3df99-e02f-4fd8-a7d8-3b19eeadaba5","userAssignedIdentities":{}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1423']
+      content-length: ['1629']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:18:01 GMT']
+      date: ['Thu, 17 Jan 2019 09:47:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1167,28 +1340,26 @@ interactions:
       CommandName: [hdinsight show]
       Connection: [keep-alive]
       ParameterSetName: [-n -g]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-hdinsight/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.51]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          azure-mgmt-hdinsight/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2015-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US","etag":"22302828-3a18-4278-942a-ea5c40040c09","tags":null,"properties":{"clusterVersion":"3.6.1000.67","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.1810270004.json","kind":"spark","componentVersion":{"spark":"2.3"}},"computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"Medium"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2018-11-17T00:01:58.477","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard"}}'}
+        US 2","etag":"010ac3a5-0328-45b7-8d53-40d17a9c3201","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3005-27","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.1901050618.json","kind":"spark","componentVersion":{"spark":"2.3"}},"computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"large"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"Medium"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2019-01-17T09:26:38.727","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard"},"identity":{"type":"SystemAssigned","principalId":"20975b3b-500d-4b91-9af3-96bec20a104e","tenantId":"0cd3df99-e02f-4fd8-a7d8-3b19eeadaba5","userAssignedIdentities":{}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1423']
+      content-length: ['1629']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 17 Nov 2018 00:18:03 GMT']
+      date: ['Thu, 17 Jan 2019 09:47:36 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-hdi-matched-rule: [ClusterResourcesAndSubResources]
-      x-ms-hdi-routed-to: [RegionalRp]
-      x-ms-hdi-served-by: [eastus]
+      x-ms-hdi-served-by: [southcentralus]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1200,9 +1371,8 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       ParameterSetName: [--name --yes --no-wait]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.51]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.14393-SP0) msrest/0.6.1 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.55]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/hdicli-000001?api-version=2018-05-01
@@ -1211,9 +1381,9 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 17 Nov 2018 00:18:04 GMT']
+      date: ['Thu, 17 Jan 2019 09:47:37 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1IRElDTEk6MkRVNVE3SS1FQVNUVVMiLCJqb2JMb2NhdGlvbiI6ImVhc3R1cyJ9?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1IRElDTEk6MkRYSlVZRS1FQVNUVVMyIiwiam9iTG9jYXRpb24iOiJlYXN0dXMyIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]

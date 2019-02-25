@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.52"
+__version__ = "2.0.59"
 
 import os
 import sys
@@ -83,7 +83,14 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
-        print(get_az_version_string())
+        ver_string, updates_available = get_az_version_string()
+        print(ver_string)
+        if updates_available == -1:
+            logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
+        elif updates_available:
+            logger.warning('You have %i updates available. Consider updating your CLI installation.', updates_available)
+        else:
+            print('Your CLI is up-to-date.')
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
@@ -104,6 +111,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.command_table = self.command_table
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
+    # pylint: disable=too-many-statements
     def load_command_table(self, args):
         from importlib import import_module
         import pkgutil
@@ -124,8 +132,9 @@ class MainCommandsLoader(CLICommandsLoader):
                 installed_command_modules = [modname for _, modname, _ in
                                              pkgutil.iter_modules(mods_ns_pkg.__path__)
                                              if modname not in BLACKLISTED_MODS]
-            except ImportError:
-                pass
+            except ImportError as e:
+                logger.warning(e)
+
             logger.debug('Installed command modules %s', installed_command_modules)
             cumulative_elapsed_time = 0
             for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:
@@ -171,7 +180,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 module_commands = set(self.command_table.keys())
                 for ext in allowed_extensions:
                     ext_name = ext.name
-                    ext_dir = get_extension_path(ext_name)
+                    ext_dir = ext.path or get_extension_path(ext_name)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
@@ -218,9 +227,12 @@ class MainCommandsLoader(CLICommandsLoader):
         def _get_extension_suppressions(mod_loaders):
             res = []
             for m in mod_loaders:
-                sup = getattr(m, 'suppress_extension', None)
-                if sup and isinstance(sup, ModExtensionSuppress):
-                    res.append(sup)
+                suppressions = getattr(m, 'suppress_extension', None)
+                if suppressions:
+                    suppressions = suppressions if isinstance(suppressions, list) else [suppressions]
+                    for sup in suppressions:
+                        if isinstance(sup, ModExtensionSuppress):
+                            res.append(sup)
             return res
 
         _update_command_table_from_modules(args)
@@ -323,7 +335,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         doc_string_source = command_kwargs.get('doc_string_source', None)
         if not doc_string_source:
             return
-        elif not isinstance(doc_string_source, str):
+        if not isinstance(doc_string_source, str):
             raise CLIError("command authoring error: applying doc_string_source '{}' directly will cause slowdown. "
                            'Import by string name instead.'.format(doc_string_source.__name__))
 
@@ -359,13 +371,11 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         version = get_api_version(self.cli_ctx, resource_type)
         if isinstance(version, str):
             return version
-        else:
-            version = getattr(version, operation_group, None)
-            if version:
-                return version
-            else:
-                from azure.cli.core.profiles._shared import APIVersionException
-                raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
+        version = getattr(version, operation_group, None)
+        if version:
+            return version
+        from azure.cli.core.profiles._shared import APIVersionException
+        raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         from azure.cli.core.profiles import supported_api_version
@@ -380,7 +390,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             operation_group=operation_group)
         if isinstance(api_support, bool):
             return api_support
-        elif operation_group:
+        if operation_group:
             return getattr(api_support, operation_group)
         return api_support
 
@@ -428,8 +438,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
             op = handler or self.get_op_handler(operation)
             op_args = get_arg_list(op)
+            cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
 
-            client = client_factory(self.cli_ctx, command_args) if client_factory else None
+            client = client_factory(cmd.cli_ctx, command_args) if client_factory else None
             supports_no_wait = kwargs.get('supports_no_wait', None)
             if supports_no_wait:
                 no_wait_enabled = command_args.pop('no_wait', False)
@@ -438,8 +449,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 client_arg_name = resolve_client_arg_name(operation, kwargs)
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
-            result = op(**command_args)
-            return result
+            return op(**command_args)
 
         def default_arguments_loader():
             op = handler or self.get_op_handler(operation)

@@ -104,8 +104,7 @@ def get_one_of_subscription_locations(cli_ctx):
     result = get_subscription_locations(cli_ctx)
     if result:
         return next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
-    else:
-        raise CLIError('Current subscription does not have valid location list')
+    raise CLIError('Current subscription does not have valid location list')
 
 
 def get_resource_groups(cli_ctx):
@@ -235,18 +234,18 @@ def get_enum_type(data, default=None):
 # GLOBAL ARGUMENT DEFINITIONS
 
 resource_group_name_type = CLIArgumentType(
-    options_list=('--resource-group', '-g'),
+    options_list=['--resource-group', '-g'],
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
     configured_default='group')
 
-name_type = CLIArgumentType(options_list=('--name', '-n'), help='the primary resource name')
+name_type = CLIArgumentType(options_list=['--name', '-n'], help='the primary resource name')
 
 
 def get_location_type(cli_ctx):
     location_type = CLIArgumentType(
-        options_list=('--location', '-l'),
+        options_list=['--location', '-l'],
         completer=get_location_completion_list,
         type=get_location_name_type(cli_ctx),
         help="Location. Values from: `az account list-locations`. "
@@ -279,7 +278,7 @@ tag_type = CLIArgumentType(
 )
 
 no_wait_type = CLIArgumentType(
-    options_list=('--no-wait', ),
+    options_list=['--no-wait', ],
     help='do not wait for the long-running operation to finish',
     action='store_true'
 )

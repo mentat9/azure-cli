@@ -5,6 +5,8 @@
 
 from __future__ import print_function
 import threading
+import time
+
 
 try:
     from urllib.parse import urlparse
@@ -17,6 +19,9 @@ import json
 import ssl
 import sys
 import OpenSSL.crypto
+
+from fabric import Connection
+
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -31,19 +36,22 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
-                                   DeletedAppRestoreRequest, DefaultErrorResponseException)
+                                   DeletedAppRestoreRequest, DefaultErrorResponseException,
+                                   SnapshotRestoreRequest, SnapshotRecoverySource)
+from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import in_cloud_console
-from azure.cli.core.util import open_page_in_browser
+from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
+
+from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
-from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
+from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-                           should_create_new_rg, set_location, check_if_asp_exists, check_app_exists,
+                           should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
                            get_lang_from_content)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
@@ -151,10 +159,27 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
-    for name_value in settings + slot_settings:
-        # split at the first '=', appsetting should not have '=' in the name
-        settings_name, value = name_value.split('=', 1)
-        app_settings.properties[settings_name] = value
+    result, slot_result = {}, {}
+    # pylint: disable=too-many-nested-blocks
+    for src, dest in [(settings, result), (slot_settings, slot_result)]:
+        for s in src:
+            try:
+                temp = shell_safe_json_parse(s)
+                if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
+                    for t in temp:
+                        if t.get('slotSetting', True):
+                            slot_result[t['name']] = t['value']
+                        else:
+                            result[t['name']] = t['value']
+                else:
+                    dest.update(temp)
+            except CLIError:
+                setting_name, value = s.split('=', 1)
+                dest[setting_name] = value
+
+    result.update(slot_result)
+    for setting_name, value in result.items():
+        app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
@@ -162,8 +187,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                          app_settings.properties, slot, client)
 
     app_settings_slot_cfg_names = []
-    if slot_settings:
-        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+    if slot_result:
+        new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
         slot_cfg_names.app_setting_names += new_slot_setting_names
@@ -281,6 +306,8 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PREMIUMV2'
     elif tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
+    elif tier in ['EP1', 'EP2', 'EP3']:
+        return 'ElasticPremium'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -452,7 +479,6 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
 
     for arg in args[2:]:
-        print(arg, values[arg])
         if values.get(arg, None):
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
@@ -620,7 +646,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         min_tls_version=None,  # pylint: disable=unused-argument
                         http20_enabled=None,  # pylint: disable=unused-argument
                         app_command_line=None,  # pylint: disable=unused-argument
-                        ftps_state=None):  # pylint: disable=unused-argument
+                        ftps_state=None,  # pylint: disable=unused-argument
+                        generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
@@ -636,8 +663,20 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
     for arg in args[3:]:
-        if values.get(arg, None):
+        if arg != 'generic_configurations' and values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+
+    generic_configurations = generic_configurations or []
+    result = {}
+    for s in generic_configurations:
+        try:
+            result.update(get_json_object(s))
+        except CLIError:
+            config_name, value = s.split('=', 1)
+            result[config_name] = value
+
+    for config_name, value in result.items():
+        setattr(configs, config_name, value)
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -805,6 +844,15 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
+def update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url=None,
+                                          docker_custom_image_name=None, docker_registry_server_user=None,
+                                          docker_registry_server_password=None, slot=None):
+    return update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
+                                     docker_custom_image_name, docker_registry_server_user, None,
+                                     docker_registry_server_password, multicontainer_config_type=None,
+                                     multicontainer_config_file=None, slot=slot)
+
+
 def _get_acr_cred(cli_ctx, registry_name):
     from azure.mgmt.containerregistry import ContainerRegistryManagementClient
     from azure.cli.core.commands.parameters import get_resources_in_subscription
@@ -835,6 +883,10 @@ def show_container_settings(cmd, resource_group_name, name, show_multicontainer_
     settings = get_app_settings(cmd, resource_group_name, name, slot)
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           show_multicontainer_config, slot))
+
+
+def show_container_settings_functionapp(cmd, resource_group_name, name, slot=None):
+    return show_container_settings(cmd, resource_group_name, name, show_multicontainer_config=None, slot=slot)
 
 
 def _filter_for_container_settings(cmd, resource_group_name, name, settings,
@@ -1018,7 +1070,6 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                 return LongRunningOperation(cmd.cli_ctx)(poller)
             except Exception as ex:  # pylint: disable=broad-except
                 import re
-                import time
                 ex = ex_handler_factory(no_throw=True)(ex)
                 # for non server errors(50x), just throw; otherwise retry 4 times
                 if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
@@ -1217,6 +1268,39 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
         return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
 
     return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+
+
+def list_snapshots(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_snapshots',
+                                   slot)
+
+
+def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,  # pylint: disable=redefined-outer-name
+                     source_resource_group=None, source_name=None, source_slot=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    recover_config = not restore_content_only
+    if all([source_resource_group, source_name]):
+        # Restore from source app to target app
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        source_id = "/subscriptions/" + sub_id + "/resourceGroups/" + source_resource_group + \
+            "/providers/Microsoft.Web/sites/" + source_name
+        if source_slot:
+            source_id = source_id + "/slots/" + source_slot
+        source = SnapshotRecoverySource(id=source_id)
+        request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
+                                         recover_configuration=recover_config)
+        if slot:
+            return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.restore_snapshot(resource_group_name, name, request)
+    elif any([source_resource_group, source_name]):
+        raise CLIError('usage error: --source-resource-group and --source-name must both be specified if one is used')
+    else:
+        # Overwrite app with its own snapshot
+        request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
+        if slot:
+            return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.restore_snapshot(resource_group_name, name, request)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -1534,7 +1618,6 @@ def show_cors(cmd, resource_group_name, name, slot=None):
 def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
-    import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
@@ -1602,7 +1685,6 @@ def _get_log(url, user_name, password, log_file=None):
 def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
@@ -1610,10 +1692,10 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, cert_resource_group_name)
+                                    webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
-    return client.certificates.create_or_update(cert_resource_group_name, cert_name, cert)
+    return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 
 def _generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
@@ -1802,11 +1884,34 @@ class _StackRuntimeHelper(object):
         self._stacks = result
 
 
+def get_app_insights_key(cli_ctx, resource_group, name):
+    appinsights_client = get_mgmt_service_client(cli_ctx, ApplicationInsightsManagementClient)
+    appinsights = appinsights_client.components.get(resource_group, name)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        raise CLIError("App Insights {} under resource group {} was not found.".format(name, resource_group))
+    return appinsights.instrumentation_key
+
+
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
+                                        number_of_workers=None, location=None, tags=None):
+    # This command merely shadows 'az appservice plan create' except with a few parameters
+    return create_app_service_plan(cmd, resource_group_name, name, is_linux=None, hyper_v=None,
+                                   sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
+
+
+def is_plan_Elastic_Premium(plan_info):
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier == 'ElasticPremium'
+    return False
+
+
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
-                    deployment_source_url=None, deployment_source_branch='master',
-                    deployment_local_git=None, deployment_container_image_name=None, tags=None):
-    # pylint: disable=too-many-statements
+                    app_insights=None, app_insights_key=None, deployment_source_url=None,
+                    deployment_source_branch='master', deployment_local_git=None,
+                    deployment_container_image_name=None, tags=None):
+    # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -1815,6 +1920,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
@@ -1844,13 +1950,21 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
+    if runtime:
+        if is_linux and runtime not in LINUX_RUNTIMES:
+            raise CLIError("usage error: Currently supported runtimes (--runtime) in linux function apps are: {}."
+                           .format(', '.join(LINUX_RUNTIMES)))
+        elif not is_linux and runtime not in WINDOWS_RUNTIMES:
+            raise CLIError("usage error: Currently supported runtimes (--runtime) in windows function apps are: {}."
+                           .format(', '.join(WINDOWS_RUNTIMES)))
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
+
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if is_linux:
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
         if consumption_plan_location:
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
         else:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='beta'))
@@ -1876,12 +1990,20 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
-    if consumption_plan_location is None:
+    if consumption_plan_location is None and not is_plan_Elastic_Premium(plan_info):
         site_config.always_on = True
     else:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
+
+    if app_insights_key is not None:
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                      value=app_insights_key))
+    elif app_insights is not None:
+        instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                      value=instrumentation_key))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -1967,22 +2089,22 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 
 def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
-    import time
     total_trials = (int(timeout) // 2) if timeout else 450
-    for _num_trials in range(total_trials):
+    num_trials = 0
+    while num_trials < total_trials:
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
+        num_trials = num_trials + 1
         if res_dict.get('status', 0) == 3:
-            logger.warning("Zip deployment failed status %s", res_dict['status_text'])
-            break
+            raise CLIError("Zip deployment failed.")
         elif res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        raise ValueError("""Deployment is taking longer than expected. Please verify
+        raise CLIError("""Deployment is taking longer than expected. Please verify
                             status at '{}' beforing launching the app""".format(deployment_status_url))
     return res_dict
 
@@ -2083,7 +2205,8 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
             version_used_create != "-" else version_used_create
 
     full_sku = get_sku_name(sku)
-    loc_name = set_location(cmd, sku, location)
+    location = set_location(cmd, sku, location)
+    loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
     asp = "appsvc_asp_{}_{}".format(os_val, loc_name)
     rg_name = "appsvc_rg_{}_{}".format(os_val, loc_name)
@@ -2121,7 +2244,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-        _create_new_asp = check_if_asp_exists(cmd, rg_name, asp, location)
+        _create_new_asp = should_create_new_asp(cmd, rg_name, asp, location)
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
@@ -2133,8 +2256,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _create_new_app = True
     else:
         logger.warning("App service plan '%s' already exists.", asp)
-        _create_new_asp = False
-        _create_new_app = check_app_exists(cmd, rg_name, name)
+        _create_new_app = should_create_new_app(cmd, rg_name, name)
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ....", name)
@@ -2143,7 +2265,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _set_build_appSetting = True
     else:
         logger.warning("App '%s' already exists", name)
-        if do_deployment:
+        if do_deployment and not is_skip_build:
             # setting the appsettings causes a app restart so we avoid if not needed
             _app_settings = get_app_settings(cmd, rg_name, name)
             if all(not d for d in _app_settings):
@@ -2156,21 +2278,18 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
     # update create_json to include the app_url
     url = _get_url(cmd, rg_name, name)
 
-    if do_deployment and not is_skip_build and _set_build_appSetting:
+    if _set_build_appSetting:
         # setting to build after deployment
         logger.warning("Updating app settings to enable build after deployment")
         update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
-        # work around until the timeout limits issue for linux is investigated & fixed
-        # wakeup kudu, by making an SCM call
-        import time
-        time.sleep(5)
-        _ping_scm_site(cmd, rg_name, name)
 
+    if do_deployment:
         logger.warning("Creating zip with contents of dir %s ...", src_dir)
         # zip contents & deploy
         zip_file_path = zip_contents_from_dir(src_dir, language)
 
-        logger.warning("Preparing to deploy %s contents to app.",
+        logger.warning("Preparing to deploy %s contents to app."
+                       "This operation can take a while to complete ...",
                        '' if is_skip_build else 'and build')
         enable_zip_deploy(cmd, rg_name, name, zip_file_path)
         # Remove the file afer deployment, handling exception if user removed the file manually
@@ -2192,3 +2311,110 @@ def _ping_scm_site(cmd, resource_group, name):
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
     requests.get(scm_url + '/api/settings', headers=authorization)
+
+
+def is_webapp_up(tunnel_server):
+    return tunnel_server.is_webapp_up()
+
+
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None):
+    webapp = show_webapp(cmd, resource_group_name, name, slot)
+    is_linux = webapp.reserved
+    if not is_linux:
+        raise CLIError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
+
+    profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
+    profile_user_name = next(p['userName'] for p in profiles)
+    profile_user_password = next(p['userPWD'] for p in profiles)
+
+    ssh_user_name = 'root'
+    ssh_user_password = 'Docker!'
+
+    if port is None:
+        port = 0  # Will auto-select a free port from 1024-65535
+        logger.info('No port defined, creating on random free port')
+    host_name = name
+
+    if slot is not None:
+        host_name += "-" + slot
+
+    tunnel_server = TunnelServer('', port, host_name, profile_user_name, profile_user_password)
+    _ping_scm_site(cmd, resource_group_name, name)
+
+    _wait_for_webapp(tunnel_server)
+
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+
+    s = threading.Thread(target=_start_ssh_session,
+                         args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
+    s.daemon = True
+    s.start()
+
+    while s.isAlive() and t.isAlive():
+        time.sleep(5)
+
+
+def _wait_for_webapp(tunnel_server):
+    tries = 0
+    while True:
+        if is_webapp_up(tunnel_server):
+            break
+        if tries == 0:
+            logger.warning('Connection is not ready yet, please wait')
+        if tries == 60:
+            raise CLIError("Timeout Error, Unable to establish a connection")
+        tries = tries + 1
+        logger.warning('.')
+        time.sleep(1)
+
+
+def _start_tunnel(tunnel_server):
+    tunnel_server.start_server()
+
+
+def _start_ssh_session(hostname, port, username, password):
+    tries = 0
+    while True:
+        try:
+            c = Connection(host=hostname,
+                           port=port,
+                           user=username,
+                           # connect_timeout=60*10,
+                           connect_kwargs={"password": password})
+            break
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info(ex)
+            if tries == 0:
+                logger.warning('Connection is not ready yet, please wait')
+            if tries == 60:
+                raise CLIError("Timeout Error, Unable to establish a connection")
+            tries = tries + 1
+            logger.warning('.')
+            time.sleep(1)
+    try:
+        c.run('cat /etc/motd', pty=True)
+        c.run('source /etc/profile; exec $SHELL -l', pty=True)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info(ex)
+    finally:
+        c.close()
+
+
+def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
+    import platform
+    if platform.system() == "Windows":
+        raise CLIError('webapp ssh is only supported on linux and mac')
+    else:
+        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot)
+
+
+def create_devops_build(cmd, functionapp_name=None, organization_name=None, project_name=None,
+                        overwrite_yaml=None, use_local_settings=None, local_git=None):
+    from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
+    azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
+                                                                 organization_name, project_name,
+                                                                 overwrite_yaml, use_local_settings,
+                                                                 local_git)
+    return azure_devops_build_interactive.interactive_azure_devops_build()

@@ -2,6 +2,39 @@
 
 Release History
 ===============
+* vm create: --accelerated-networking is now implicitly enabled for Ubuntu 18.0. It can still be explicitly disabled by setting the option to "false".
+
+2.2.15
+++++++
+* vm list-skus: Allow use of `--all` in place of `--all true`
+* Add `vmss run-command [invoke / list / show]`
+* vmss encryption enable: Fixed bug where command fails if it was ran previously.
+* Moving `az identity` command tree to `azure-cli-role`.
+
+2.2.14
+++++++
+* Minor fixes
+
+2.2.13
+++++++
+* `vm encryption enable`: now validates --disk encryption keyvault and that key encryption keyvault exists, in line with `vmss encryption enable`. Exposes --force. For more info: see issues #8111 and #8110
+
+2.2.12
+++++++
+* 'vm disk/unmanaged-disk' and 'vmss disk': parameter options are more consistent.
+* `vm/vmss create`: support cross tenant image referencing.
+* `vm diagnostics get-default-config --windows-os`: fix bug in windows os default config.
+* `vmss extension set`: expose `--provision-after-extensions`. It defines what extensions must be provisioned before the extension being set.
+* `sig image-version update`: expose --replica-count for setting the default replication count.
+
+2.2.11
+++++++
+* `disk create`: expose --os-type parameter.
+* `image create --source`: fixed bug where source os disk is mistaken for a VM with the same name, even if the full resource ID is provided.
+
+2.2.10
+++++++
+* `vm identity remove`: does not crash if the specified vm has no assigned managed service identities.
 
 2.2.9
 ++++++

@@ -13,9 +13,6 @@ helps['ad sp create-for-rbac'] = """
     parameters:
         - name: --name -n
           short-summary: a URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
-        - name: --password -p
-          short-summary: The password used to log in.
-          long-summary: If not present and `--cert` is not specified, a random password will be generated.
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When used with `--keyvault,` indicates the name of the cert to use or create.
@@ -110,6 +107,7 @@ helps['ad sp create'] = """
 helps['ad sp list'] = """
     type: command
     short-summary: List service principals.
+    long-summary: For low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
 """
 helps['ad sp owner'] = """
     type: group
@@ -134,6 +132,7 @@ helps['ad app delete'] = """
 helps['ad app list'] = """
     type: command
     short-summary: List applications.
+    long-summary: for low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
 """
 helps['ad app show'] = """
     type: command
@@ -155,6 +154,19 @@ helps['ad app update'] = """
                             "type": "Scope"
                         }
                    ]
+                }]
+        - name: declare an application role
+          text: |
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --app-roles @manifest.json
+                ("manifest.json" contains the following conten)
+                [{
+                    "allowedMemberTypes": [
+                      "User"
+                    ],
+                    "description": "Approvers can mark documents as approved",
+                    "displayName": "Approver",
+                    "isEnabled": "true",
+                    "value": "approver"
                 }]
         - name: update an application's group membership claims to "All"
           text: >
@@ -186,7 +198,7 @@ helps['ad app permission grant'] = """
     short-summary: Grant the app an API permission
     examples:
         - name: Grant a native application with permissions to access an existing API with TTL of 2 years
-          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --app-id a0322f79-57df-498f-9d9f-12678 --expires 2
+          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678 --expires 2
 """
 helps['ad app permission list'] = """
     type: command
@@ -277,28 +289,28 @@ helps['role definition create'] = """
     examples:
         - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
           text: |
-                az role definition create --role-definition '{
-                    "Name": "Contoso On-call",
-                    "Description": "Perform VM actions and read storage and network information."
-                    "Actions": [
-                        "Microsoft.Compute/*/read",
-                        "Microsoft.Compute/virtualMachines/start/action",
-                        "Microsoft.Compute/virtualMachines/restart/action",
-                        "Microsoft.Network/*/read",
-                        "Microsoft.Storage/*/read",
-                        "Microsoft.Authorization/*/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                        "Microsoft.Insights/alertRules/*",
-                        "Microsoft.Support/*"
-                    ],
-                    "DataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
-                    ],
-                    "NotDataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
-                    ],
-                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+                az role definition create --role-definition '{ \\
+                    "Name": "Contoso On-call", \\
+                    "Description": "Perform VM actions and read storage and network information." \\
+                    "Actions": [ \\
+                        "Microsoft.Compute/*/read", \\
+                        "Microsoft.Compute/virtualMachines/start/action", \\
+                        "Microsoft.Compute/virtualMachines/restart/action", \\
+                        "Microsoft.Network/*/read", \\
+                        "Microsoft.Storage/*/read", \\
+                        "Microsoft.Authorization/*/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read", \\
+                        "Microsoft.Insights/alertRules/*", \\
+                        "Microsoft.Support/*" \\
+                    ], \\
+                    "DataActions": [ \\
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*" \\
+                    ], \\
+                    "NotDataActions": [ \\
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write" \\
+                    ], \\
+                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] \\
                 }'
         - name: Create a role from a file containing a JSON description.
           text: >
@@ -341,6 +353,19 @@ helps['ad app create'] = """
                             "type": "Scope"
                         }
                    ]
+                }]
+        - name: Create an application with a role
+          text: |
+                az ad app create --id e042ec79-34cd-498f-9d9f-123456781234 --display-name mytestapp --identifier-uris https://mytestapp.websites.net --app-roles @manifest.json
+                ("manifest.json" contains the following conten)
+                [{
+                    "allowedMemberTypes": [
+                      "User"
+                    ],
+                    "description": "Approvers can mark documents as approved",
+                    "displayName": "Approver",
+                    "isEnabled": "true",
+                    "value": "approver"
                 }]
 """
 helps['ad group'] = """
@@ -390,4 +415,19 @@ helps['ad signed-in-user'] = """
 helps['ad signed-in-user list-owned-objects'] = """
     type: command
     short-summary: Get the list of directory objects that are owned by the user
+"""
+
+helps['identity'] = """
+    type: group
+    short-summary: Managed Service Identities
+"""
+
+helps['identity list'] = """
+    type: command
+    short-summary: List Managed Service Identities
+"""
+
+helps['identity list-operations'] = """
+    type: command
+    short-summary: Lists available operations for the Managed Identity provider
 """
